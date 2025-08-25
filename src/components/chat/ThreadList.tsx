@@ -13,56 +13,44 @@ import {
   StatusBar,
 } from 'react-native';
 import { useChat } from '../../contexts/ChatContext';
-import SwipeableRow from '../common/SwipeableRow';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 interface ThreadListProps {
   onClose: () => void;
-  onChatCreated: () => void; // New prop to notify parent when chat is created
+  onChatSelected: (chatId: string) => void;
 }
 
-const ThreadList: React.FC<ThreadListProps> = ({ onClose, onChatCreated }) => {
+const ThreadList: React.FC<ThreadListProps> = ({ onClose, onChatSelected }) => {
   const {
     chats,
     currentChatId,
-    currentThreadId,
-    setCurrentChat,
-    setCurrentThread,
-    createChat,
-    createThread,
     deleteChat,
-    deleteThread,
     updateChatTitle,
-    updateThreadTitle,
-    toggleChatExpansion,
+    startNewChat, // Use the new function
+    createChat,
+   // onChatCreated, // New prop to notify parent
   } = useChat();
   
-  const [createChatModalVisible, setCreateChatModalVisible] = useState(false);
-  const [createThreadModalVisible, setCreateThreadModalVisible] = useState(false);
-  const [editChatModalVisible, setEditChatModalVisible] = useState(false);
-  const [editThreadModalVisible, setEditThreadModalVisible] = useState(false);
-  const [newChatTitle, setNewChatTitle] = useState('');
-  const [newThreadTitle, setNewThreadTitle] = useState('');
-  const [editingChatId, setEditingChatId] = useState<string | null>(null);
-  const [editingThreadId, setEditingThreadId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState('');
 
-  const handleCreateChat = () => {
+
+  const handleNewChat = () => {
+    startNewChat(); // Use the new function
+    onClose(); // Close the sidebar
+  };
+  
+  const [createChatModalVisible, setCreateChatModalVisible] = useState(false);
+  const [editChatModalVisible, setEditChatModalVisible] = useState(false);
+  const [newChatTitle, setNewChatTitle] = useState('');
+  const [editingChatId, setEditingChatId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState('');
+  const [optionsVisibleForChat, setOptionsVisibleForChat] = useState<string | null>(null);
+
+    const handleCreateChat = () => {
     if (newChatTitle.trim()) {
       createChat(newChatTitle);
       setNewChatTitle('');
       setCreateChatModalVisible(false);
-      onChatCreated(); // Notify parent that chat was created
-      onClose(); // Close the sidebar
-    }
-  };
-
-  const handleCreateThread = (chatId: string) => {
-    if (newThreadTitle.trim()) {
-      createThread(chatId, newThreadTitle);
-      setNewThreadTitle('');
-      setCreateThreadModalVisible(false);
-      onChatCreated(); // Notify parent that thread was created
+      //onChatCreated(); // Notify parent that chat was created
       onClose(); // Close the sidebar
     }
   };
@@ -71,6 +59,7 @@ const ThreadList: React.FC<ThreadListProps> = ({ onClose, onChatCreated }) => {
     setEditingChatId(chatId);
     setEditingTitle(currentTitle);
     setEditChatModalVisible(true);
+    setOptionsVisibleForChat(null); // Close options menu
   };
 
   const handleSaveChatEdit = () => {
@@ -78,23 +67,6 @@ const ThreadList: React.FC<ThreadListProps> = ({ onClose, onChatCreated }) => {
       updateChatTitle(editingChatId, editingTitle);
       setEditChatModalVisible(false);
       setEditingChatId(null);
-      setEditingTitle('');
-    }
-  };
-
-  const handleEditThread = (chatId: string, threadId: string, currentTitle: string) => {
-    setEditingChatId(chatId);
-    setEditingThreadId(threadId);
-    setEditingTitle(currentTitle);
-    setEditThreadModalVisible(true);
-  };
-
-  const handleSaveThreadEdit = () => {
-    if (editingChatId && editingThreadId && editingTitle.trim()) {
-      updateThreadTitle(editingChatId, editingThreadId, editingTitle);
-      setEditThreadModalVisible(false);
-      setEditingChatId(null);
-      setEditingThreadId(null);
       setEditingTitle('');
     }
   };
@@ -108,118 +80,79 @@ const ThreadList: React.FC<ThreadListProps> = ({ onClose, onChatCreated }) => {
         { text: 'Delete', style: 'destructive', onPress: () => deleteChat(chatId) },
       ]
     );
+    setOptionsVisibleForChat(null); // Close options menu
   };
 
-  const confirmDeleteThread = (chatId: string, threadId: string, threadTitle: string) => {
-    Alert.alert(
-      'Delete Thread',
-      `Are you sure you want to delete "${threadTitle}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => deleteThread(chatId, threadId) },
-      ]
-    );
+  const toggleOptions = (chatId: string) => {
+    setOptionsVisibleForChat(optionsVisibleForChat === chatId ? null : chatId);
   };
 
-  const handleChatSelection = (chatId: string, threadId: string) => {
-    setCurrentChat(chatId);
-    setCurrentThread(threadId);
+  const handleChatSelection = (chatId: string) => {
+    onChatSelected(chatId);
     onClose(); // Close the sidebar after selection
   };
 
+  
   const renderChatItem = ({ item }: { item: any }) => (
     <View style={styles.chatItem}>
-      <View style={styles.chatHeader}>
-        <TouchableOpacity
-          style={styles.chatTitleContainer}
-          onPress={() => toggleChatExpansion(item.id)}
-        >
-          <MaterialIcons
-            name={item.isExpanded ? 'keyboard-arrow-down' : 'keyboard-arrow-right'}
-            size={24}
-            color="#666666"
-          />
-          <Text style={styles.chatTitle} numberOfLines={1}>
-            {item.title}
-          </Text>
-        </TouchableOpacity>
-        
-        <View style={styles.chatActions}>
-          <TouchableOpacity
-            onPress={() => {
-              setEditingChatId(item.id);
-              setCreateThreadModalVisible(true);
-            }}
-            style={styles.actionButton}
-          >
-            <Ionicons name="add" size={20} color="#007AFF" />
-          </TouchableOpacity>
-          
-          <SwipeableRow
-            onEdit={() => handleEditChat(item.id, item.title)}
-            onDelete={() => confirmDeleteChat(item.id, item.title)}
-          >
-            <TouchableOpacity style={styles.actionButton}>
-              <MaterialIcons name="more-vert" size={20} color="#666666" />
-            </TouchableOpacity>
-          </SwipeableRow>
-        </View>
-      </View>
+      <TouchableOpacity
+        style={styles.chatTitleContainer}
+        onPress={() => handleChatSelection(item.id)}
+      >
+        <MaterialIcons name="chat" size={20} color="#007AFF" />
+        <Text style={styles.chatTitle} numberOfLines={1}>
+          {item.title}
+        </Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity
+        onPress={() => toggleOptions(item.id)}
+        style={styles.optionsButton}
+      >
+        <MaterialIcons name="more-vert" size={20} color="#666666" />
+      </TouchableOpacity>
 
-      {item.isExpanded && (
-        <View style={styles.threadsContainer}>
-          {item.threads.map((thread: any) => (
-            <SwipeableRow
-              key={thread.id}
-              onEdit={() => handleEditThread(item.id, thread.id, thread.title)}
-              onDelete={() => confirmDeleteThread(item.id, thread.id, thread.title)}
-            >
-              <TouchableOpacity
-                style={[
-                  styles.threadItem,
-                  currentThreadId === thread.id && styles.threadItemActive,
-                ]}
-                onPress={() => handleChatSelection(item.id, thread.id)}
-              >
-                <Text
-                  style={[
-                    styles.threadTitle,
-                    currentThreadId === thread.id && styles.threadTitleActive,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {thread.title}
-                </Text>
-                <Text style={styles.threadPreview} numberOfLines={1}>
-                  {thread.messages.length > 0
-                    ? thread.messages[thread.messages.length - 1].content
-                    : 'No messages yet'}
-                </Text>
-              </TouchableOpacity>
-            </SwipeableRow>
-          ))}
-          
-          {item.threads.length === 0 && (
-            <Text style={styles.noThreadsText}>No threads yet</Text>
-          )}
+      {/* Options dropdown */}
+      {optionsVisibleForChat === item.id && (
+        <View style={styles.optionsMenu}>
+          <TouchableOpacity
+            style={styles.optionButton}
+            onPress={() => handleEditChat(item.id, item.title)}
+          >
+            <MaterialIcons name="edit" size={16} color="#007AFF" />
+            <Text style={styles.optionText}>Rename</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.optionButton}
+            onPress={() => confirmDeleteChat(item.id, item.title)}
+          >
+            <MaterialIcons name="delete" size={16} color="#FF3B30" />
+            <Text style={[styles.optionText, styles.deleteOptionText]}>Delete</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
   );
 
-  // Get screen dimensions
-  const screenWidth = Dimensions.get('window').width;
+   const screenWidth = Dimensions.get('window').width;
   const screenHeight = Dimensions.get('window').height;
   const statusBarHeight = StatusBar.currentHeight || 0;
-
   return (
     <View style={[styles.container, { width: screenWidth * 0.85, height: screenHeight }]}>
-      <View style={[styles.header, { marginTop: Platform.OS === 'android' ? statusBarHeight : 0 }]}>
+      <View style={styles.header}>
         <Text style={styles.headerTitle}>Conversations</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <Ionicons name="close" size={24} color="#007AFF" />
         </TouchableOpacity>
       </View>
+
+      <TouchableOpacity
+        style={styles.newChatButton}
+        onPress={handleNewChat} // Use the new handler
+      >
+        <Ionicons name="add" size={24} color="#FFFFFF" />
+        <Text style={styles.newChatText}>New Chat</Text>
+      </TouchableOpacity>
 
       <FlatList
         data={chats}
@@ -228,17 +161,7 @@ const ThreadList: React.FC<ThreadListProps> = ({ onClose, onChatCreated }) => {
         contentContainerStyle={styles.listContent}
         style={styles.list}
       />
-
-      <TouchableOpacity
-        style={styles.newChatButton}
-        onPress={() => setCreateChatModalVisible(true)}
-      >
-        <Ionicons name="add" size={24} color="#FFFFFF" />
-        <Text style={styles.newChatText}>New Chat</Text>
-      </TouchableOpacity>
-
-      {/* Create Chat Modal */}
-      <Modal
+        <Modal
         visible={createChatModalVisible}
         transparent
         animationType="fade"
@@ -273,42 +196,6 @@ const ThreadList: React.FC<ThreadListProps> = ({ onClose, onChatCreated }) => {
         </View>
       </Modal>
 
-      {/* Create Thread Modal */}
-      <Modal
-        visible={createThreadModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setCreateThreadModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>New Thread</Text>
-            <TextInput
-              style={styles.input}
-              value={newThreadTitle}
-              onChangeText={setNewThreadTitle}
-              autoFocus
-              placeholder="Thread title"
-              onSubmitEditing={() => editingChatId && handleCreateThread(editingChatId)}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setCreateThreadModalVisible(false)}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.saveButton]}
-                onPress={() => editingChatId && handleCreateThread(editingChatId)}
-              >
-                <Text style={styles.saveButtonText}>Create</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
       {/* Edit Chat Modal */}
       <Modal
         visible={editChatModalVisible}
@@ -318,7 +205,7 @@ const ThreadList: React.FC<ThreadListProps> = ({ onClose, onChatCreated }) => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Edit Chat</Text>
+            <Text style={styles.modalTitle}>Rename Chat</Text>
             <TextInput
               style={styles.input}
               value={editingTitle}
@@ -342,17 +229,49 @@ const ThreadList: React.FC<ThreadListProps> = ({ onClose, onChatCreated }) => {
           </View>
         </View>
       </Modal>
+    </View>
+  );
+  // Get screen dimensions
 
-      {/* Edit Thread Modal */}
+
+  return (
+    <View style={[styles.container, { width: screenWidth * 0.85, height: screenHeight }]}>
+      <View style={[styles.header, { marginTop: Platform.OS === 'android' ? statusBarHeight : 0 }]}>
+        <Text style={styles.headerTitle}>Conversations</Text>
+        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <Ionicons name="close" size={24} color="#007AFF" />
+        </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity
+        style={styles.newChatButton}
+        onPress={() => setCreateChatModalVisible(true)}
+      >
+        <Ionicons name="add" size={24} color="#FFFFFF" />
+        <Text style={styles.newChatText}>New Chat</Text>
+      </TouchableOpacity>
+
+      <FlatList
+        data={chats}
+        keyExtractor={item => item.id}
+        renderItem={renderChatItem}
+        contentContainerStyle={styles.listContent}
+        style={styles.list}
+      />
+
+      {/* Create Chat Modal */}
+    
+
+      {/* Edit Chat Modal */}
       <Modal
-        visible={editThreadModalVisible}
+        visible={editChatModalVisible}
         transparent
         animationType="fade"
-        onRequestClose={() => setEditThreadModalVisible(false)}
+        onRequestClose={() => setEditChatModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Edit Thread</Text>
+            <Text style={styles.modalTitle}>Rename Chat</Text>
             <TextInput
               style={styles.input}
               value={editingTitle}
@@ -362,13 +281,13 @@ const ThreadList: React.FC<ThreadListProps> = ({ onClose, onChatCreated }) => {
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setEditThreadModalVisible(false)}
+                onPress={() => setEditChatModalVisible(false)}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.saveButton]}
-                onPress={handleSaveThreadEdit}
+                onPress={handleSaveChatEdit}
               >
                 <Text style={styles.saveButtonText}>Save</Text>
               </TouchableOpacity>
@@ -379,6 +298,9 @@ const ThreadList: React.FC<ThreadListProps> = ({ onClose, onChatCreated }) => {
     </View>
   );
 };
+
+  
+
 
 const styles = StyleSheet.create({
   container: {
@@ -418,61 +340,53 @@ const styles = StyleSheet.create({
   chatItem: {
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
-  },
-  chatHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    position: 'relative',
   },
   chatTitleContainer: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    flex: 1,
   },
   chatTitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: 12,
+    flex: 1,
   },
-  chatActions: {
+  optionsButton: {
+    position: 'absolute',
+    right: 16,
+    top: 16,
+    padding: 8,
+  },
+  optionsMenu: {
+    position: 'absolute',
+    right: 16,
+    top: 50,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 1001,
+    minWidth: 120,
+  },
+  optionButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-  actionButton: {
-    padding: 4,
+  optionText: {
     marginLeft: 8,
-  },
-  threadsContainer: {
-    paddingLeft: 48,
-    paddingRight: 16,
-  },
-  threadItem: {
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F8F8F8',
-  },
-  threadItemActive: {
-    backgroundColor: '#F0F7FF',
-  },
-  threadTitle: {
     fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 4,
   },
-  threadTitleActive: {
-    color: '#007AFF',
-  },
-  threadPreview: {
-    fontSize: 12,
-    color: '#666666',
-  },
-  noThreadsText: {
-    fontSize: 12,
-    color: '#999999',
-    fontStyle: 'italic',
-    paddingVertical: 12,
+  deleteOptionText: {
+    color: '#FF3B30',
   },
   newChatButton: {
     flexDirection: 'row',

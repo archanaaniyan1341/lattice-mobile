@@ -39,8 +39,8 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSendMessage }, r
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      behavior={Platform.OS === 'android' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'android' ? 90 : 0}
     >
       <View style={styles.container}>
         <TextInput

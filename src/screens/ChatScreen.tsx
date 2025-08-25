@@ -10,7 +10,6 @@ import {
   StatusBar,
   TouchableWithoutFeedback,
   Animated,
-  TextInput,
 } from 'react-native';
 import { useChat } from '../contexts/ChatContext';
 import ThreadList from '../components/chat/ThreadList';
@@ -19,12 +18,21 @@ import ChatInput from '../components/chat/ChatInput';
 import { Ionicons } from '@expo/vector-icons';
 
 const ChatScreen: React.FC = () => {
-  const { chats, currentChatId, currentThreadId, addMessage } = useChat();
+  const { 
+    chats, 
+    currentChatId, 
+    currentThreadId, 
+    addMessage, 
+    setCurrentChat, 
+    setCurrentThread,
+    isNewChat,
+  } = useChat();
+  
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [sidebarAnimation] = useState(new Animated.Value(-Dimensions.get('window').width));
   const [isGeneratingResponse, setIsGeneratingResponse] = useState(false);
   const flatListRef = useRef<FlatList>(null);
-  const textInputRef = useRef<TextInput>(null);
+  const textInputRef = useRef<any>(null);
 
   const currentChat = chats.find(chat => chat.id === currentChatId);
   const currentThread = currentChat?.threads.find(thread => thread.id === currentThreadId);
@@ -56,22 +64,22 @@ const ChatScreen: React.FC = () => {
     }).start(() => setSidebarVisible(false));
   };
 
-  const handleChatCreated = () => {
-    // Focus on the text input when a new chat is created
-    setTimeout(() => {
-      if (textInputRef.current) {
-        textInputRef.current.focus();
-      }
-    }, 100);
+  const handleChatSelected = (chatId: string) => {
+    setCurrentChat(chatId);
+    const chat = chats.find(c => c.id === chatId);
+    if (chat && chat.threads.length > 0) {
+      setCurrentThread(chat.threads[0].id);
+    } else {
+      setCurrentThread('');
+    }
   };
 
   const handleSendMessage = async (content: string) => {
-    if (!content.trim() || !currentChatId || !currentThreadId) return;
+    if (!content.trim()) return;
     
     setIsGeneratingResponse(true);
     await addMessage(content);
     
-    // Scroll to bottom after adding message
     setTimeout(() => {
       if (flatListRef.current) {
         flatListRef.current.scrollToEnd({ animated: true });
@@ -91,24 +99,24 @@ const ChatScreen: React.FC = () => {
 
   // Auto-focus on input when a new empty thread is selected
   useEffect(() => {
-    if (currentThread && currentThread.messages.length === 0) {
+    if ((currentThread && currentThread.messages.length === 0) || isNewChat) {
       setTimeout(() => {
         if (textInputRef.current) {
           textInputRef.current.focus();
         }
       }, 300);
     }
-  }, [currentThreadId]);
+  }, [currentThreadId, isNewChat]);
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, Platform.OS === 'android' && { marginTop: StatusBar.currentHeight }]}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={toggleSidebar} style={styles.menuButton}>
           <Ionicons name="menu" size={24} color="#007AFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle} numberOfLines={1}>
-            {currentChat?.title || 'Chat'}
+            {isNewChat ? 'New Chat' : currentChat?.title || 'Chat'}
           </Text>
           {currentThread && (
             <Text style={styles.threadSubtitle} numberOfLines={1}>
@@ -120,40 +128,58 @@ const ChatScreen: React.FC = () => {
       </View>
 
       <View style={styles.content}>
-        {currentThread ? (
-          <>
-            <FlatList
-              ref={flatListRef}
-              data={currentThread.messages}
-              keyExtractor={item => item.id}
-              renderItem={({ item }) => <MessageBubble message={item} />}
-              contentContainerStyle={styles.messagesList}
-              onContentSizeChange={() => {
-                if (flatListRef.current && currentThread.messages.length > 0) {
-                  flatListRef.current.scrollToEnd({ animated: true });
-                }
-              }}
-              onLayout={() => {
-                if (flatListRef.current && currentThread.messages.length > 0) {
-                  flatListRef.current.scrollToEnd({ animated: true });
-                }
-              }}
-            />
-            {isGeneratingResponse && (
-              <View style={styles.typingIndicator}>
-                <View style={styles.typingDot} />
-                <View style={styles.typingDot} />
-                <View style={styles.typingDot} />
+        {/* Always show the message list area */}
+        <View style={styles.messagesContainer}>
+          {isNewChat ? (
+            // Empty state for new chat
+            <View style={styles.emptyState}>
+              <Ionicons name="chatbubble-outline" size={64} color="#CCCCCC" />
+              <Text style={styles.emptyStateText}>Start a new conversation</Text>
+            </View>
+          ) : currentChat ? (
+            currentThread ? (
+              <FlatList
+                ref={flatListRef}
+                data={currentThread.messages}
+                keyExtractor={item => item.id}
+                renderItem={({ item }) => <MessageBubble message={item} />}
+                contentContainerStyle={styles.messagesList}
+                onContentSizeChange={() => {
+                  if (flatListRef.current && currentThread.messages.length > 0) {
+                    flatListRef.current.scrollToEnd({ animated: true });
+                  }
+                }}
+                onLayout={() => {
+                  if (flatListRef.current && currentThread.messages.length > 0) {
+                    flatListRef.current.scrollToEnd({ animated: true });
+                  }
+                }}
+              />
+            ) : (
+              <View style={styles.emptyState}>
+                <Ionicons name="chatbubbles" size={64} color="#CCCCCC" />
+                <Text style={styles.emptyStateText}>This chat has no threads yet</Text>
               </View>
-            )}
-            <ChatInput onSendMessage={handleSendMessage} ref={textInputRef} />
-          </>
-        ) : (
-          <View style={styles.emptyState}>
-            <Ionicons name="chatbubbles" size={64} color="#CCCCCC" />
-            <Text style={styles.emptyStateText}>Select a thread to start chatting</Text>
+            )
+          ) : (
+            <View style={styles.emptyState}>
+              <Ionicons name="chatbubbles" size={64} color="#CCCCCC" />
+              <Text style={styles.emptyStateText}>Select a chat to start conversation</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Typing indicator - positioned above input */}
+        {isGeneratingResponse && (
+          <View style={styles.typingIndicator}>
+            <View style={styles.typingDot} />
+            <View style={styles.typingDot} />
+            <View style={styles.typingDot} />
           </View>
         )}
+
+        {/* Input always at bottom */}
+        <ChatInput onSendMessage={handleSendMessage} ref={textInputRef} />
       </View>
 
       {/* Sidebar Overlay */}
@@ -171,7 +197,7 @@ const ChatScreen: React.FC = () => {
             { transform: [{ translateX: sidebarAnimation }] }
           ]}
         >
-          <ThreadList onClose={closeSidebar} onChatCreated={handleChatCreated} />
+          <ThreadList onClose={closeSidebar} onChatSelected={handleChatSelected} />
         </Animated.View>
       )}
     </View>
@@ -219,6 +245,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    justifyContent: 'space-between', // This ensures input stays at bottom
+  },
+  messagesContainer: {
+    flex: 1, // Takes available space, pushing input to bottom
   },
   messagesList: {
     padding: 16,
@@ -235,6 +265,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#999999',
     marginTop: 16,
+    textAlign: 'center',
   },
   overlay: {
     position: 'absolute',
