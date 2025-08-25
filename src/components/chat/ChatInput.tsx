@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import {
   View,
   TextInput,
@@ -14,13 +14,25 @@ interface ChatInputProps {
   onSendMessage: (message: string) => void;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
+export interface ChatInputRef {
+  focus: () => void;
+}
+
+const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSendMessage }, ref) => {
   const [message, setMessage] = useState('');
-  const { addMessage } = useChat();
+  const { isGeneratingResponse } = useChat();
+  const textInputRef = React.useRef<TextInput>(null);
+
+  // Expose focus method to parent component
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      textInputRef.current?.focus();
+    }
+  }));
 
   const handleSend = () => {
-    if (message.trim()) {
-      addMessage(message);
+    if (message.trim() && !isGeneratingResponse) {
+      onSendMessage(message);
       setMessage('');
     }
   };
@@ -32,25 +44,33 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
     >
       <View style={styles.container}>
         <TextInput
-          style={styles.input}
+          ref={textInputRef}
+          style={[styles.input, isGeneratingResponse && styles.inputDisabled]}
           value={message}
           onChangeText={setMessage}
-          placeholder="Type a message..."
+          placeholder={isGeneratingResponse ? "AI is thinking..." : "Type a message..."}
           multiline
-          maxLength={100}
+          editable={!isGeneratingResponse}
+          onSubmitEditing={handleSend}
         />
         <TouchableOpacity
-          style={[styles.sendButton, !message.trim() && styles.sendButtonDisabled]}
+          style={[
+            styles.sendButton, 
+            (!message.trim() || isGeneratingResponse) && styles.sendButtonDisabled
+          ]}
           onPress={handleSend}
-          disabled={!message.trim()}
+          disabled={!message.trim() || isGeneratingResponse}
         >
-                    <MaterialIcons name="send" size={24} color="#FFFFFF" />
-
+          <MaterialIcons 
+            name="send" 
+            size={24} 
+            color={isGeneratingResponse ? "#999999" : "#FFFFFF"} 
+          />
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -71,6 +91,10 @@ const styles = StyleSheet.create({
     maxHeight: 100,
     marginRight: 8,
     fontSize: 16,
+  },
+  inputDisabled: {
+    backgroundColor: '#F5F5F5',
+    color: '#999999',
   },
   sendButton: {
     width: 48,

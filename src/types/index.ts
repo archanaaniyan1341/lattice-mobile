@@ -12,6 +12,14 @@ export interface Thread {
   createdAt: Date;
 }
 
+export interface Chat {
+  id: string;
+  title: string;
+  threads: Thread[];
+  createdAt: Date;
+  isExpanded?: boolean; // For UI state
+}
+
 export interface ChartData {
   labels: string[];
   datasets: {

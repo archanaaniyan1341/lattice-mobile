@@ -20,15 +20,23 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
             <Text style={styles.assistantLabel}>Lattice AI</Text>
           </View>
         )}
-        <Markdown
-          style={
-            isUser
-              ? { body: styles.userText, code_block: styles.userCode }
-              : { body: styles.assistantText, code_block: styles.assistantCode }
-          }
-        >
-          {message.content}
-        </Markdown>
+        {message.content ? (
+          <Markdown
+            style={
+              isUser
+                ? { body: styles.userText, code_block: styles.userCode }
+                : { body: styles.assistantText, code_block: styles.assistantCode }
+            }
+          >
+            {message.content}
+          </Markdown>
+        ) : (
+          <View style={styles.thinkingDots}>
+            <View style={styles.thinkingDot} />
+            <View style={styles.thinkingDot} />
+            <View style={styles.thinkingDot} />
+          </View>
+        )}
         <Text style={[styles.timestamp, isUser ? styles.userTimestamp : styles.assistantTimestamp]}>
           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </Text>
@@ -111,6 +119,19 @@ const styles = StyleSheet.create({
   },
   assistantTimestamp: {
     color: 'rgba(0, 0, 0, 0.5)',
+  },
+  thinkingDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+  },
+  thinkingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#999999',
+    marginHorizontal: 2,
   },
 });
 
