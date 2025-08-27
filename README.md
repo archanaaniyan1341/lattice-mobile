@@ -38,3 +38,10 @@ A React Native + TypeScript app that brings Lattice's core experience to mobile 
 ```bash
 git clone <repository-url>
 cd lattice-mobile
+npm install
+npx expo start
+
+
+### Demo application
+Please use the link to see demo of application
+https://drive.google.com/drive/u/1/folders/12_1TSd3StvuMBVvfyk-8OO1V_uNjHEs-
