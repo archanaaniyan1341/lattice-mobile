@@ -95,6 +95,53 @@ https://drive.google.com/drive/u/1/folders/12_1TSd3StvuMBVvfyk-8OO1V_uNjHEs-
           └───────────────────┘
 ```
 
+```
+📊 Application Flow
+
+App.tsx → Entry point that initializes providers and navigation.
+
+AppNavigator → Manages navigation between screens.
+
+Screens:
+
+DashboardScreen → Renders dashboards, widgets, and charts.
+
+ChatScreen → Renders chat threads, messages, and input.
+
+Contexts:
+
+DashboardContext → Manages state of dashboards, widgets, and chart data.
+
+ChatContext → Manages state of chat messages and threads.
+
+Components:
+
+Dashboard: DashboardHeader, WidgetGrid, ChartWidget, DropdownMenu
+
+Chat: ThreadList, MessageBubble, ChatInput
+
+Common: ConfirmationModal, LongPressMenu, SafeAreaView, SwipeableRow
+
+Data Layer → Mock data for chat and dashboards (mockChatData, mockDashboardData).
+
+Types → Centralized TypeScript types (types/index.ts).
+
+🏗️ Component Structure
+
+Modularized into screens, components, contexts, data, and types.
+
+Separation of concerns: Each feature has its own folder (chat, dashboard, common).
+
+Reusability: Common UI components like modal, swipeable row, and safe area are shared across screens.
+
+⚙️ State Management Approach
+
+React Context API is used for global state management (ChatContext, DashboardContext).
+
+Local component state (useState) for UI interactions (e.g., chat input, dropdown menu).
+
+This keeps the app lightweight, avoids unnecessary complexity (no Redux/MobX), and ensures a clean separation of UI and business logic.
+```
 ### Feature Walkthrough
 AI Conversation Module
 
