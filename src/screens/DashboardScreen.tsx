@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   createButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#836cc7',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 8,
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#836cc7',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     color: '#333333',
   },
   createModalButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#836cc7',
   },
   createModalButtonText: {
     color: '#FFFFFF',

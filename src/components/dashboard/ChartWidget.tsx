@@ -48,7 +48,7 @@ const ChartWidget: React.FC<ChartWidgetProps> = ({ widget, onDelete }) => {
     label: "",
     x: 0,
     y: 0,
-    color: "#007AFF"
+    color: "#836cc7"
   });
 
   const handleDataPointClick = (data: any) => {
@@ -59,7 +59,7 @@ const ChartWidget: React.FC<ChartWidgetProps> = ({ widget, onDelete }) => {
         label: data.dataset?.label || widget.data.labels[data.index] || `Item ${data.index + 1}`,
         x: data.x,
         y: data.y,
-        color: data.dataset?.color?.(1) || "#007AFF"
+        color: data.dataset?.color?.(1) || "#836cc7"
       });
       
       setTimeout(() => {
@@ -82,7 +82,7 @@ const ChartWidget: React.FC<ChartWidgetProps> = ({ widget, onDelete }) => {
       label: label,
       x: x,
       y: y,
-      color: widget.data.datasets[0].color?.(1) || "#007AFF"
+      color: widget.data.datasets[0].color?.(1) || "#836cc7"
     });
     
     setTimeout(() => {
@@ -138,7 +138,7 @@ const ChartWidget: React.FC<ChartWidgetProps> = ({ widget, onDelete }) => {
       propsForDots: {
         r: "6",
         strokeWidth: "2",
-        stroke: "#007AFF",
+        stroke: "#836cc7",
       },
       propsForLabels: {
         fontSize: 10,
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   tooltipValue: {
-    color: '#007AFF',
+    color: '#836cc7',
     fontSize: 14,
     fontWeight: 'bold',
   },

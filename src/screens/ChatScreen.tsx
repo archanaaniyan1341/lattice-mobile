@@ -120,7 +120,7 @@ const ChatScreen: React.FC = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={toggleSidebar} style={styles.menuButton}>
-          <Ionicons name="menu" size={24} color="#007AFF" />
+          <Ionicons name="menu" size={24} color="#836cc7" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle} numberOfLines={1}>

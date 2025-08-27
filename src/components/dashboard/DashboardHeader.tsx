@@ -129,7 +129,7 @@ const DashboardHeader: React.FC = () => {
                     style={styles.optionButton}
                     onPress={() => handleEditDashboard(dashboard.id, dashboard.title)}
                   >
-                    <MaterialIcons name="edit" size={16} color="#007AFF" />
+                    <MaterialIcons name="edit" size={16} color="#836cc7" />
                     <Text style={styles.optionText}>Rename</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -151,7 +151,7 @@ const DashboardHeader: React.FC = () => {
               setDropdownVisible(false);
             }}
           >
-            <MaterialIcons name="add" size={20} color="#007AFF" />
+            <MaterialIcons name="add" size={20} color="#836cc7" />
             <Text style={styles.createButtonText}>Create New Dashboard</Text>
           </TouchableOpacity>
         </View>
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   dropdownItemTextActive: {
-    color: '#007AFF',
+    color: '#836cc7',
     fontWeight: '600',
   },
   optionsButton: {
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   createButtonText: {
-    color: '#007AFF',
+    color: '#836cc7',
     marginLeft: 8,
     fontWeight: '600',
   },
@@ -366,13 +366,13 @@ const styles = StyleSheet.create({
     color: '#333333',
   },
   createButtonModal: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#836cc7',
   },
   createButtonTextModal: {
     color: '#FFFFFF',
   },
   saveButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#836cc7',
   },
   saveButtonText: {
     color: '#FFFFFF',

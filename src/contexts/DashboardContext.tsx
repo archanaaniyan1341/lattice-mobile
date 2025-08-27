@@ -11,6 +11,7 @@ interface DashboardContextType {
   addWidget: (widget: Omit<Widget, 'id'>) => void;
   deleteWidget: (widgetId: string) => void;
   updateDashboardTitle: (dashboardId: string, newTitle: string) => void;
+  reorderWidgets: (widgets: Widget[]) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -72,6 +73,18 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   ));
 };
 
+const reorderWidgets = (reorderedWidgets: Widget[]) => {
+  setDashboards(prev => prev.map(dashboard => {
+    if (dashboard.id === currentDashboardId) {
+      return {
+        ...dashboard,
+        widgets: reorderedWidgets
+      };
+    }
+    return dashboard;
+  }));
+
+};
   return (
     <DashboardContext.Provider value={{
       dashboards,
@@ -81,7 +94,8 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       deleteDashboard,
       addWidget,
       deleteWidget,
-      updateDashboardTitle
+      updateDashboardTitle,
+      reorderWidgets
     }}>
       {children}
     </DashboardContext.Provider>

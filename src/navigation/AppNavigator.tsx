@@ -23,7 +23,7 @@ const AppNavigator: React.FC = () => {
 
             return <Ionicons name={iconName || 'help-circle'} size={size} color={color} />;
           },
-          tabBarActiveTintColor: '#007AFF',
+          tabBarActiveTintColor: '#836cc7',
           tabBarInactiveTintColor: 'gray',
           headerShown: false,
         })}

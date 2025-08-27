@@ -16,7 +16,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       <View style={[styles.bubble, isUser ? styles.userBubble : styles.assistantBubble]}>
         {!isUser && (
           <View style={styles.assistantHeader}>
-            <MaterialIcons name="smart-toy" size={16} color="#007AFF" />
+            <MaterialIcons name="smart-toy" size={16} color="#836cc7" />
             <Text style={styles.assistantLabel}>Lattice AI</Text>
           </View>
         )}
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   userBubble: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#836cc7',
     borderBottomRightRadius: 4,
   },
   assistantBubble: {
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   assistantLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#007AFF',
+    color: '#836cc7',
     marginLeft: 4,
   },
   userText: {

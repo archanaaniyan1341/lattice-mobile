@@ -99,7 +99,7 @@ const ThreadList: React.FC<ThreadListProps> = ({ onClose, onChatSelected }) => {
         style={styles.chatTitleContainer}
         onPress={() => handleChatSelection(item.id)}
       >
-        <MaterialIcons name="chat" size={20} color="#007AFF" />
+        <MaterialIcons name="chat" size={20} color="#836cc7" />
         <Text style={styles.chatTitle} numberOfLines={1}>
           {item.title}
         </Text>
@@ -119,7 +119,7 @@ const ThreadList: React.FC<ThreadListProps> = ({ onClose, onChatSelected }) => {
             style={styles.optionButton}
             onPress={() => handleEditChat(item.id, item.title)}
           >
-            <MaterialIcons name="edit" size={16} color="#007AFF" />
+            <MaterialIcons name="edit" size={16} color="#836cc7" />
             <Text style={styles.optionText}>Rename</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -142,7 +142,7 @@ const ThreadList: React.FC<ThreadListProps> = ({ onClose, onChatSelected }) => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Conversations</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <Ionicons name="close" size={24} color="#007AFF" />
+          <Ionicons name="close" size={24} color="#836cc7" />
         </TouchableOpacity>
       </View>
 
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#007AFF',
+    backgroundColor: '#836cc7',
     margin: 16,
     padding: 16,
     borderRadius: 8,
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
     color: '#333333',
   },
   saveButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#836cc7',
   },
   saveButtonText: {
     color: '#FFFFFF',
