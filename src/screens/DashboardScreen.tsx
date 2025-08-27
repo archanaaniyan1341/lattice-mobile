@@ -32,7 +32,7 @@ const DashboardScreen: React.FC = () => {
     <View style={styles.container}>
       <DashboardHeader />
       
-      <ScrollView style={styles.content}>
+      <View style={styles.content}>
         {currentDashboard ? (
           <WidgetGrid />
         ) : (
@@ -47,7 +47,7 @@ const DashboardScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
         )}
-      </ScrollView>
+      </View>
 
       <TouchableOpacity
         style={styles.fab}

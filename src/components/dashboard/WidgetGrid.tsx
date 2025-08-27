@@ -41,38 +41,35 @@ const WidgetGrid: React.FC = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.grid}>
-        {widgets.map(widget => (
-          <View key={widget.id} style={styles.widgetContainer}>
+    <View style={styles.container}>
+      <FlatList
+        data={widgets}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.widgetContainer}>
             <ChartWidget
-              widget={widget}
-              onDelete={() => deleteWidget(widget.id)}
+              widget={item}
+              onDelete={() => deleteWidget(item.id)}
             />
           </View>
-        ))}
-      </View>
-      
-      <TouchableOpacity style={styles.addButton} onPress={handleAddWidget}>
-        <MaterialIcons name="add" size={24} color="#FFFFFF" />
-        <Text style={styles.addButtonText}>Add Widget</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        )}
+        ListFooterComponent={
+          <TouchableOpacity style={styles.addButton} onPress={handleAddWidget}>
+            <MaterialIcons name="add" size={24} color="#FFFFFF" />
+            <Text style={styles.addButtonText}>Add Widget</Text>
+          </TouchableOpacity>
+        }
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    padding: 8,
   },
   widgetContainer: {
-    width: '100%',
     marginBottom: 16,
   },
   emptyState: {
@@ -105,6 +102,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     marginTop: 16,
+    marginHorizontal: 8,
   },
   addButtonText: {
     color: '#FFFFFF',

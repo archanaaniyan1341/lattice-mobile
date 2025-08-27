@@ -26,6 +26,7 @@ const ChatScreen: React.FC = () => {
     setCurrentChat, 
     setCurrentThread,
     isNewChat,
+    startNewChat, // Add this function
   } = useChat();
   
   const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -36,6 +37,13 @@ const ChatScreen: React.FC = () => {
 
   const currentChat = chats.find(chat => chat.id === currentChatId);
   const currentThread = currentChat?.threads.find(thread => thread.id === currentThreadId);
+
+  // Automatically create new chat if no chat is selected
+  useEffect(() => {
+    if (!currentChatId && !isNewChat) {
+      startNewChat();
+    }
+  }, [currentChatId, isNewChat, startNewChat]);
 
   const toggleSidebar = () => {
     if (sidebarVisible) {
@@ -106,7 +114,7 @@ const ChatScreen: React.FC = () => {
         }
       }, 300);
     }
-  }, [currentThreadId, isNewChat]);
+  }, [currentThreadId, isNewChat, currentThread]);
 
   return (
     <View style={styles.container}>
@@ -164,7 +172,7 @@ const ChatScreen: React.FC = () => {
           ) : (
             <View style={styles.emptyState}>
               <Ionicons name="chatbubbles" size={64} color="#CCCCCC" />
-              <Text style={styles.emptyStateText}>Select a chat to start conversation</Text>
+              <Text style={styles.emptyStateText}>Starting a new chat...</Text>
             </View>
           )}
         </View>
@@ -245,10 +253,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'space-between', // This ensures input stays at bottom
+    justifyContent: 'space-between',
   },
   messagesContainer: {
-    flex: 1, // Takes available space, pushing input to bottom
+    flex: 1,
   },
   messagesList: {
     padding: 16,

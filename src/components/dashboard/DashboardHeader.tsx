@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { useDashboard } from '../../contexts/DashboardContext';
 import { MaterialIcons } from '@expo/vector-icons';
-import SwipeableRow from '../common/SwipeableRow';
 
 const DashboardHeader: React.FC = () => {
   const {
@@ -19,13 +18,16 @@ const DashboardHeader: React.FC = () => {
     setCurrentDashboard,
     createDashboard,
     deleteDashboard,
+    updateDashboardTitle,
   } = useDashboard();
+  
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [newDashboardTitle, setNewDashboardTitle] = useState('');
   const [editingDashboardId, setEditingDashboardId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
+  const [optionsVisibleForDashboard, setOptionsVisibleForDashboard] = useState<string | null>(null);
 
   const currentDashboard = dashboards.find(d => d.id === currentDashboardId);
 
@@ -41,15 +43,16 @@ const DashboardHeader: React.FC = () => {
     setEditingDashboardId(dashboardId);
     setEditingTitle(currentTitle);
     setEditModalVisible(true);
-    setDropdownVisible(false);
+    setOptionsVisibleForDashboard(null); // Close options menu
   };
 
   const handleSaveEdit = () => {
-    // In a real app, you would update the dashboard title here
-    // For now, we'll just close the modal
-    setEditModalVisible(false);
-    setEditingDashboardId(null);
-    setEditingTitle('');
+    if (editingDashboardId && editingTitle.trim()) {
+      updateDashboardTitle(editingDashboardId, editingTitle);
+      setEditModalVisible(false);
+      setEditingDashboardId(null);
+      setEditingTitle('');
+    }
   };
 
   const confirmDeleteDashboard = (dashboardId: string, dashboardTitle: string) => {
@@ -61,6 +64,17 @@ const DashboardHeader: React.FC = () => {
         { text: 'Delete', style: 'destructive', onPress: () => deleteDashboard(dashboardId) },
       ]
     );
+    setOptionsVisibleForDashboard(null); // Close options menu
+  };
+
+  const toggleOptions = (dashboardId: string) => {
+    setOptionsVisibleForDashboard(optionsVisibleForDashboard === dashboardId ? null : dashboardId);
+  };
+
+  const handleDashboardSelect = (dashboardId: string) => {
+    setCurrentDashboard(dashboardId);
+    setDropdownVisible(false);
+    setOptionsVisibleForDashboard(null); // Close any open options menu
   };
 
   return (
@@ -81,20 +95,13 @@ const DashboardHeader: React.FC = () => {
       {dropdownVisible && (
         <View style={styles.dropdown}>
           {dashboards.map(dashboard => (
-            <SwipeableRow
-              key={dashboard.id}
-              onEdit={() => handleEditDashboard(dashboard.id, dashboard.title)}
-              onDelete={() => confirmDeleteDashboard(dashboard.id, dashboard.title)}
-            >
+            <View key={dashboard.id} style={styles.dropdownItemContainer}>
               <TouchableOpacity
                 style={[
                   styles.dropdownItem,
                   dashboard.id === currentDashboardId && styles.dropdownItemActive,
                 ]}
-                onPress={() => {
-                  setCurrentDashboard(dashboard.id);
-                  setDropdownVisible(false);
-                }}
+                onPress={() => handleDashboardSelect(dashboard.id)}
               >
                 <Text
                   style={[
@@ -106,8 +113,37 @@ const DashboardHeader: React.FC = () => {
                   {dashboard.title}
                 </Text>
               </TouchableOpacity>
-            </SwipeableRow>
+
+              {/* Three-dot menu button */}
+              <TouchableOpacity
+                onPress={() => toggleOptions(dashboard.id)}
+                style={styles.optionsButton}
+              >
+                <MaterialIcons name="more-vert" size={20} color="#666666" />
+              </TouchableOpacity>
+
+              {/* Options menu */}
+              {optionsVisibleForDashboard === dashboard.id && (
+                <View style={styles.optionsMenu}>
+                  <TouchableOpacity
+                    style={styles.optionButton}
+                    onPress={() => handleEditDashboard(dashboard.id, dashboard.title)}
+                  >
+                    <MaterialIcons name="edit" size={16} color="#007AFF" />
+                    <Text style={styles.optionText}>Rename</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.optionButton}
+                    onPress={() => confirmDeleteDashboard(dashboard.id, dashboard.title)}
+                  >
+                    <MaterialIcons name="delete" size={16} color="#FF3B30" />
+                    <Text style={[styles.optionText, styles.deleteOptionText]}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
           ))}
+          
           <TouchableOpacity
             style={styles.createButton}
             onPress={() => {
@@ -165,12 +201,13 @@ const DashboardHeader: React.FC = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Edit Dashboard</Text>
+            <Text style={styles.modalTitle}>Rename Dashboard</Text>
             <TextInput
               style={styles.input}
               value={editingTitle}
               onChangeText={setEditingTitle}
               autoFocus
+              placeholder="Enter new dashboard name"
             />
             <View style={styles.modalButtons}>
               <TouchableOpacity
@@ -180,10 +217,10 @@ const DashboardHeader: React.FC = () => {
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.modalButton, styles.createButtonModal]}
+                style={[styles.modalButton, styles.saveButton]}
                 onPress={handleSaveEdit}
               >
-                <Text style={styles.createButtonTextModal}>Save</Text>
+                <Text style={styles.saveButtonText}>Save</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -227,10 +264,16 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     maxHeight: 300,
   },
-  dropdownItem: {
-    padding: 16,
+  dropdownItemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
+  },
+  dropdownItem: {
+    flex: 1,
+    padding: 16,
   },
   dropdownItemActive: {
     backgroundColor: '#F0F7FF',
@@ -241,6 +284,36 @@ const styles = StyleSheet.create({
   dropdownItemTextActive: {
     color: '#007AFF',
     fontWeight: '600',
+  },
+  optionsButton: {
+    padding: 16,
+  },
+  optionsMenu: {
+    position: 'absolute',
+    right: 50,
+    top: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 1001,
+    minWidth: 120,
+  },
+  optionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  optionText: {
+    marginLeft: 8,
+    fontSize: 14,
+  },
+  deleteOptionText: {
+    color: '#FF3B30',
   },
   createButton: {
     flexDirection: 'row',
@@ -296,6 +369,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#007AFF',
   },
   createButtonTextModal: {
+    color: '#FFFFFF',
+  },
+  saveButton: {
+    backgroundColor: '#007AFF',
+  },
+  saveButtonText: {
     color: '#FFFFFF',
   },
 });

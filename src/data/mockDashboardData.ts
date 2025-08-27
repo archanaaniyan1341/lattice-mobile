@@ -236,4 +236,8 @@ export const defaultWidgetTemplates = [
     title: 'Pie Chart',
     data: samplePieChartData,
   },
+  {
+    type:'candlestickChart' as const,
+    title: 'Candlestick Chart',
+  }
 ];

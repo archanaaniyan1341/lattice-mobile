@@ -10,6 +10,7 @@ interface DashboardContextType {
   deleteDashboard: (dashboardId: string) => void;
   addWidget: (widget: Omit<Widget, 'id'>) => void;
   deleteWidget: (widgetId: string) => void;
+  updateDashboardTitle: (dashboardId: string, newTitle: string) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -65,6 +66,12 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     }));
   };
 
+  const updateDashboardTitle = (dashboardId: string, newTitle: string) => {
+  setDashboards(prev => prev.map(dashboard => 
+    dashboard.id === dashboardId ? { ...dashboard, title: newTitle } : dashboard
+  ));
+};
+
   return (
     <DashboardContext.Provider value={{
       dashboards,
@@ -74,6 +81,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       deleteDashboard,
       addWidget,
       deleteWidget,
+      updateDashboardTitle
     }}>
       {children}
     </DashboardContext.Provider>
